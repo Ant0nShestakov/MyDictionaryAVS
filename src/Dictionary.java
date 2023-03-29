@@ -13,6 +13,15 @@ public class Dictionary {
         SecondType
     }
 
+    private static String info = "info - открыть документацию\n" +
+            "ReadAll (Название словаря(First или Second)) - прочитать весь словарь\n" +
+            "Search (Название словаря(First или Second)) (Название ключа) - вывести значение по ключу\n" +
+            "Delete (Название словаря(First или Second)) (Название ключа) - удалить значение по ключу\n" +
+            "Add (Название словаря(First или Second)) (Название ключа) - добавить запись по правилу Ключ-Значение\n" +
+                    "Примечание: \n" +
+                    "В First длинна слов может быть только 4 символа и эти символы только буквы латинской раскладки\n" +
+                    "В Second длина слов может быть только 5 символа и эти символы только цифры.\n";
+
     private Types tp;
     private Map<String, String> dictionary;
     private String fileName;
@@ -39,6 +48,10 @@ public class Dictionary {
         System.out.println("___Файл загружен___");
     }
 
+    public static String GetInfo() {
+        return info;
+    }
+
     public void ReadAll() {
         for(Map.Entry<String, String> e : dictionary.entrySet()) {
             System.out.println(e.getKey() + "-" + e.getValue());
@@ -50,18 +63,22 @@ public class Dictionary {
     }
 
     public void Delete(String key) throws IOException {
-        dictionary.remove(key);
-        String context = "";
-        FileWriter fw = new FileWriter(fileName, false);
-        for(Map.Entry<String, String> e : dictionary.entrySet()) {
-            if(context.equals(""))
-                context += e.getKey() + "-" + e.getValue();
-            else
-                context += "\n" + e.getKey() + "-" + e.getValue();
+        if(dictionary.containsKey(key)) {
+            dictionary.remove(key);
+            String context = "";
+            FileWriter fw = new FileWriter(fileName, false);
+            for (Map.Entry<String, String> e : dictionary.entrySet()) {
+                if (context.equals(""))
+                    context += e.getKey() + "-" + e.getValue();
+                else
+                    context += "\n" + e.getKey() + "-" + e.getValue();
+            }
+            fw.write(context + "\n");
+            fw.close();
+            System.out.println("___Запись по ключу " + key + " удалена!___");
         }
-        fw.write(context+"\n");
-        fw.close();
-        System.out.println("___Запись по ключу " + key + " удалена!___");
+        else
+            System.out.println("___Записи по ключу " + key + " нет в словаре!___");
     }
 
     //Проверка на повтор ключа
@@ -73,7 +90,7 @@ public class Dictionary {
             return true;
     }
 
-    public boolean isNumeric(String s) {
+    private boolean isNumeric(String s) {
         try {
             Double.parseDouble(s);
             return true;
@@ -85,7 +102,7 @@ public class Dictionary {
     private boolean ValidityСheck(String value) {
         String[] array = value.split("-");
         boolean onlyLatinAlphabetFirst = array[0].matches("^[a-zA-Z0-9]+$");
-        boolean onlyLatinAlphabetSecond = array[0].matches("^[a-zA-Z0-9]+$");
+        boolean onlyLatinAlphabetSecond = array[1].matches("^[a-zA-Z0-9]+$");
         if(tp == Types.firstType)
             if(array[0].length() <= 4 && array[1].length() <= 4 && onlyLatinAlphabetFirst && onlyLatinAlphabetSecond)
                 return true;
