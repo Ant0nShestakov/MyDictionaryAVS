@@ -8,18 +8,25 @@ import java.util.List;
 import java.util.Map;
 
 public class Dictionary {
+    enum Types {
+        firstType,
+        SecondType
+    }
 
+    private Types tp;
     private Map<String, String> dictionary;
     private String fileName;
 
-    public Dictionary(String fileName) throws IOException {
+    public Dictionary(String fileName, Types type) throws IOException {
         this.fileName = fileName;
+        this.tp = type;
         dictionary = new HashMap<String, String>();
+        File f = new File(this.fileName);
+        f.createNewFile();
         LoadFile();
     }
 
     private void LoadFile() throws IOException {
-
         dictionary.clear();
         Path path = Paths.get(fileName);
         List<String> list = Files.readAllLines(path, StandardCharsets.UTF_8);
@@ -52,7 +59,7 @@ public class Dictionary {
             else
                 context += "\n" + e.getKey() + "-" + e.getValue();
         }
-        fw.write(context);
+        fw.write(context+"\n");
         fw.close();
         System.out.println("___Запись по ключу " + key + " удалена!___");
     }
@@ -66,10 +73,36 @@ public class Dictionary {
             return true;
     }
 
+    public boolean isNumeric(String s) {
+        try {
+            Double.parseDouble(s);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
+    private boolean ValidityСheck(String value) {
+        String[] array = value.split("-");
+        boolean onlyLatinAlphabetFirst = array[0].matches("^[a-zA-Z0-9]+$");
+        boolean onlyLatinAlphabetSecond = array[0].matches("^[a-zA-Z0-9]+$");
+        if(tp == Types.firstType)
+            if(array[0].length() <= 4 && array[1].length() <= 4 && onlyLatinAlphabetFirst && onlyLatinAlphabetSecond)
+                return true;
+            else
+                return false;
+        else if(tp == Types.SecondType)
+            if(array[0].length() <= 5 && array[1].length() <= 5 && isNumeric(array[0]) && isNumeric(array[1]))
+                return true;
+            else
+                return false;
+        return false;
+    }
+
     public void Add(String value) throws IOException {
-        if(value.contains("-") && KeyCheck(value)) {
+        if(value.contains("-") && KeyCheck(value) && ValidityСheck(value)) {
             FileWriter fw = new FileWriter(fileName, true);
-            fw.write("\n" + value);
+            fw.write(value + "\n");
             System.out.println("___Запись завершена!___");
             fw.close();
             LoadFile();
